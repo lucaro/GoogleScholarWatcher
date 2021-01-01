@@ -1,0 +1,16 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.21'
+    id 'application'
+}
+
+mainClassName = 'ch.lucaro.gswatch.Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+    implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+'
+}
