@@ -22,6 +22,7 @@ object Main {
         val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
 
         val baseDir = File("store")
+        baseDir.mkdir()
 
         val gss = GoogleScholarScraper()
 
