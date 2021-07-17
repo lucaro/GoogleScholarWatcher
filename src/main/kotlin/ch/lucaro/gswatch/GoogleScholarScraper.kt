@@ -38,7 +38,7 @@ class GoogleScholarScraper {
                 .toMap()
 
         val publications = doc.select(".gsc_a_tr").map {
-            val id = it.select("a.gsc_a_at").attr("data-href").substringAfter("citation_for_view=").substringBefore("&")
+            val id = it.select("a.gsc_a_at").attr("href").substringAfter("citation_for_view=").substringBefore("&")
 
             val title = it.select(".gsc_a_at").text()
 
