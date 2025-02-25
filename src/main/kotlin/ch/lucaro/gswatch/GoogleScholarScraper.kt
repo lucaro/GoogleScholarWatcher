@@ -3,7 +3,6 @@ package ch.lucaro.gswatch
 import ch.lucaro.gswatch.data.GoogleScholarPage
 import ch.lucaro.gswatch.data.PublicationOverview
 import ch.lucaro.gswatch.data.Reference
-import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -30,7 +29,13 @@ class GoogleScholarScraper {
 
         val doc = get("https://scholar.google.com/citations?&cstart=0&pagesize=10000&user=$userId")
 
-        val total = doc.selectFirst("#gsc_rsb_st td.gsc_rsb_std").text().toInt()
+        val stats = doc.select("#gsc_rsb_st td.gsc_rsb_std").toList().map { it.text().toIntOrNull() ?: 0 }
+
+        val total = stats.getOrElse(0) { 0 }
+        val h = stats.getOrElse(2) { 0 }
+        val i10 = stats.getOrElse(4) { 0 }
+
+        val name = doc.select("div#gsc_prf_in").first()?.text() ?: ""
 
         val citationStats =
             doc.select(".gsc_g_t").map { it.text().toInt() }
@@ -49,13 +54,13 @@ class GoogleScholarScraper {
             val citationCount = it.select(".gsc_a_ac").text().toIntOrNull() ?: 0
             val year = it.select(".gsc_a_h").text().toIntOrNull() ?: 0
 
-            val reference = it.selectFirst("a.gsc_a_ac").attr("href").substringAfter("cites=").substringBefore('&')
+            val reference = it.selectFirst("a.gsc_a_ac")?.attr("href")?.substringAfter("cites=")?.substringBefore('&') ?: ""
 
             PublicationOverview(id, title, authors, venue, year, citationCount, reference)
 
         }
 
-        return GoogleScholarPage(userId, total, citationStats, publications)
+        return GoogleScholarPage(userId, name, total, h, i10, citationStats, publications)
     }
 
     fun scrapeReferencesPages(referenceId: String, expectedReferences: List<Reference> = emptyList()): List<Reference> {
@@ -68,8 +73,8 @@ class GoogleScholarScraper {
 
                 val title = it.select(".gs_rt").text()
                 val info = it.select(".gs_a").text()
-                val link = it.select(".gs_rt").select("a")?.attr("href")
-                val directLink = it.select(".gs_or_ggsm")?.select("a")?.attr("href")
+                val link = it.select(".gs_rt").select("a").attr("href")
+                val directLink = it.select(".gs_or_ggsm").select("a").attr("href")
 
                 Reference(title, info, link, directLink)
 
